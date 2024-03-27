@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Driver</string>
+    <string name="welcome">Welcome</string>
+
+    <string name="your_email">Your Email</string>
+    <string name="your_password">Your Password</string>
+    <string name="log_in">Log in</string>
+    <string name="sign_up">Sign Up</string>
+
+    <string name="upload_your_image">Upload Your Image</string>
+    <string name="please_enter_your_name">Your Name</string>
+    <string name="your_phone_number">Your phone number</string>
+    <string name="your_password_again">"enter again your password "</string>
+    <string name="create_new_account">create</string>
+    <string name="switch_to_login">"switch to login "</string>
+</resources>
