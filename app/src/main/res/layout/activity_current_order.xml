@@ -196,16 +196,6 @@
                     android:textStyle="bold"
                     android:id="@+id/text_vehicleName"/>
 
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/grey_line"
-                    android:layout_below="@id/textDriverName"
-                    android:id="@+id/frame_payment"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"/>
-
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
