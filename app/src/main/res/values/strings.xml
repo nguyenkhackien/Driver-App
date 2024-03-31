@@ -11,6 +11,6 @@
     <string name="please_enter_your_name">Your Name</string>
     <string name="your_phone_number">Your phone number</string>
     <string name="your_password_again">"enter again your password "</string>
-    <string name="create_new_account">create</string>
+    <string name="create_new_account">Sign Up</string>
     <string name="switch_to_login">"switch to login "</string>
 </resources>
