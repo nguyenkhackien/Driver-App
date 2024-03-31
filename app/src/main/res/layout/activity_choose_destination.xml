@@ -12,16 +12,7 @@
         android:layout_alignParentTop="true"
         android:id="@+id/frame_maps"
         android:background="@color/green"
-        android:layout_above="@id/layoutBottom">
-
-        <fragment
-            android:id="@+id/fragment_maps"
-            android:name="com.google.android.gms.maps.MapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout="@layout/fragment_maps"/>
-
-    </FrameLayout>
+        android:layout_above="@id/layoutBottom"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
