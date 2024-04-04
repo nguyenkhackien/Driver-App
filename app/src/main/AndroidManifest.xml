@@ -13,9 +13,11 @@
         android:theme="@style/Theme.DriverApp"
         tools:targetApi="31">
         <activity
+            android:name=".Activities.RegisterVehicleActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.EachOrderIncomeItemActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".Activities.WalletActivity"
             android:exported="false" />

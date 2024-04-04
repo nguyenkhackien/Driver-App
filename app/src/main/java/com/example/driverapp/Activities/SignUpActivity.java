@@ -22,11 +22,16 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
+
+import java.util.HashMap;
 
 
 public class SignUpActivity extends AppCompatActivity {
@@ -38,7 +43,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     Uri imageUri;
 
-    final int PICK_IMAGE_REQUEST = 123;
+    HashMap<String, Boolean> driverEmails;
+    final int PICK_IMAGE_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,11 +89,15 @@ public class SignUpActivity extends AppCompatActivity {
             if (email.isEmpty()) {
                 Toast.makeText(this, "Your email must not be empty!", Toast.LENGTH_SHORT).show();
                 return;
-            } else {
+            } else  {
                 if (!(android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())) {
                     Toast.makeText(this, "Your email is invalid!", Toast.LENGTH_SHORT).show();
                     return;
                 }
+            }
+            if (!driverEmails.containsKey(email)){
+                Toast.makeText(this, "your email does not exist!",Toast.LENGTH_SHORT).show();
+                return;
             }
             if (password.isEmpty()) {
                 Toast.makeText(this, "Your password must not be empty!", Toast.LENGTH_SHORT).show();
@@ -167,5 +177,29 @@ public class SignUpActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Error, please try again!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void getDriverEmails() {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driverEmails = new HashMap<>();
+                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                            Driver driver = dataSnapshot.getValue(Driver.class);
+                            if (driver != null) {
+                                if (!(driver.getEmail().isEmpty())) {
+                                    driverEmails.put(driver.getEmail(), true);
+                                }
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 }

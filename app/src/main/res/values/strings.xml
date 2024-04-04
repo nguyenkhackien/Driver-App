@@ -13,4 +13,12 @@
     <string name="your_password_again">"enter again your password "</string>
     <string name="create_new_account">Sign Up</string>
     <string name="switch_to_login">"switch to login "</string>
+    <string name="vehicle_registration">register vehicle</string>
+    <string name="upload_your_vehicle_image">upload your vehicle image</string>
+    <string name="your_vehicle_name">your vehicle name</string>
+    <string name="plateNumber">plate number</string>
+    <string name="select_your_vehicle_type">your vehicle type</string>
+    <string name="motorbike">motorbike</string>
+    <string name="car">car</string>
+    <string name="register">register</string>
 </resources>
