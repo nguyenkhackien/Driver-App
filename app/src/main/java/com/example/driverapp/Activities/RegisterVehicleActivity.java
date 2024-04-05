@@ -22,12 +22,16 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.driverapp.R;
+import com.example.driverapp.models.Driver;
 import com.example.driverapp.models.Vehicle;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
@@ -49,6 +53,8 @@ public class RegisterVehicleActivity extends AppCompatActivity {
     Uri vehicleImg;
 
     String vehicleType;
+
+    Driver driver;
     final int PICK_IMAGE_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +101,8 @@ public class RegisterVehicleActivity extends AppCompatActivity {
         buttonRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = edtName.getText().toString().trim();
-                String plateNumber = edtPlateNumber.getText().toString().trim();
+                String name = edtName.getText().toString();
+                String plateNumber = edtPlateNumber.getText().toString();
 
                 if (vehicleImg == null) {
                     Toast.makeText(getApplicationContext(), "Please select your vehicle Image!", Toast.LENGTH_SHORT).show();
@@ -144,7 +150,23 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+                FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        driver = snapshot.getValue(Driver.class);
+                        driver.setVehicleId(vehicle.getPlateNumber());
+                        FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(driver);
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                Intent intent = new Intent(RegisterVehicleActivity.this,MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         });
     }

@@ -95,10 +95,6 @@ public class SignUpActivity extends AppCompatActivity {
                     return;
                 }
             }
-            if (!driverEmails.containsKey(email)){
-                Toast.makeText(this, "your email does not exist!",Toast.LENGTH_SHORT).show();
-                return;
-            }
             if (password.isEmpty()) {
                 Toast.makeText(this, "Your password must not be empty!", Toast.LENGTH_SHORT).show();
                 return;
@@ -135,7 +131,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 buttonSignUp.setEnabled(true);
                             }
                         });
-                        db.getReference().child("user").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        db.getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Intent intent = new Intent(SignUpActivity.this,LoginActivity.class);
@@ -179,27 +175,5 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
-    private void getDriverEmails() {
-        FirebaseDatabase.getInstance().getReference().child("Drivers")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        driverEmails = new HashMap<>();
-                        for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                            Driver driver = dataSnapshot.getValue(Driver.class);
-                            if (driver != null) {
-                                if (!(driver.getEmail().isEmpty())) {
-                                    driverEmails.put(driver.getEmail(), true);
-                                }
-                            }
-                        }
 
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-    }
 }
