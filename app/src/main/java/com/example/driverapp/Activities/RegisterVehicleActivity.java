@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.driverapp.R;
 import com.example.driverapp.models.Driver;
 import com.example.driverapp.models.Vehicle;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -125,23 +126,33 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                 vehicle.setPlateNumber(plateNumber);
                 vehicle.setType(vehicleType);
                 vehicle.setDriverId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-
+                vehicle.setVehicleImageUrl(vehicleImg.toString());
                 StorageReference filePath = FirebaseStorage.getInstance().getReference("vehicleImages")
                         .child(System.currentTimeMillis() + ".jpg");
-                StorageTask uploadTask = filePath.putFile(vehicleImg).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                StorageTask uploadTask = filePath.putFile(vehicleImg);
+                uploadTask.continueWithTask(new Continuation() {
                     @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        String uri = task.getResult().toString();
-                        vehicle.setVehicleImageUrl(uri);
+                    public Object then(@NonNull Task task) throws Exception {
+                        if(!task.isSuccessful()){
+                            throw task.getException();
+                        }
+                        return filePath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        Uri downloadUri =(Uri) task.getResult();
+                        String imgUri = downloadUri.toString();
+                        vehicle.setVehicleImageUrl(imgUri);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                         buttonRegister.setEnabled(true);
                     }
                 });
-                FirebaseDatabase db = FirebaseDatabase.getInstance();
-                db.getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle).addOnCompleteListener(new OnCompleteListener<Void>() {
+                FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Toast.makeText(getApplicationContext(), "Register successful!", Toast.LENGTH_SHORT).show();

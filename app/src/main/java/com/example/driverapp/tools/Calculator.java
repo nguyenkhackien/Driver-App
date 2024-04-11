@@ -2,7 +2,7 @@ package com.example.driverapp.tools;
 
 import android.content.Context;
 
-import com.example.lightningdriver.models.Trip;
+import com.example.driverapp.models.Trip;
 
 import java.text.NumberFormat;
 import java.util.List;

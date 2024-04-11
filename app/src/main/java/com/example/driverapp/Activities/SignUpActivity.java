@@ -17,6 +17,7 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.example.driverapp.R;
 import com.example.driverapp.models.Driver;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -31,6 +32,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 
+import java.net.URI;
 import java.util.HashMap;
 
 
@@ -44,7 +46,7 @@ public class SignUpActivity extends AppCompatActivity {
     Uri imageUri;
 
     HashMap<String, Boolean> driverEmails;
-    final int PICK_IMAGE_REQUEST = 1;
+    final int PICK_IMAGE_REQUEST = 123;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,13 +106,12 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
             if (!(password.equals(passwordAgain))) {
-                Toast.makeText(this, "Your password and your confirm password are not matched!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Your password are not matched!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            driver = new Driver(null,name,phone,email,null,null);
+            driver = new Driver(null,name,phone,email,imageUri.toString(),null);
             FirebaseAuth mAuth = FirebaseAuth.getInstance();
-            FirebaseDatabase db = FirebaseDatabase.getInstance();
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
@@ -119,19 +120,30 @@ public class SignUpActivity extends AppCompatActivity {
 
                         StorageReference filePath = FirebaseStorage.getInstance().getReference("DriverImages")
                                 .child(System.currentTimeMillis() + ".jpg");
-                        StorageTask uploadTask = filePath.putFile(imageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        StorageTask uploadTask = filePath.putFile(imageUri);
+                        uploadTask.continueWithTask(new Continuation() {
                             @Override
-                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                                String downloadUri = task.getResult().toString();
-                                driver.setDriverImageUrl(downloadUri);
+                            public Object then(@NonNull Task task) throws Exception {
+                                if(!task.isSuccessful()){
+                                    throw task.getException();
+                                }
+                                return filePath.getDownloadUrl();
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener() {
+                            @Override
+                            public void onComplete(@NonNull Task task) {
+                                Uri downloadUri =(Uri) task.getResult();
+                                String imgUri = downloadUri.toString();
+                                driver.setDriverImageUrl(imgUri);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                                 buttonSignUp.setEnabled(true);
                             }
                         });
-                        db.getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Intent intent = new Intent(SignUpActivity.this,LoginActivity.class);
