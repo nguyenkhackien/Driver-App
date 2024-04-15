@@ -146,6 +146,7 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                         String imgUrl = downloadUri.toString();
 
                         vehicle.setVehicleImageUrl(imgUrl);
+                        FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -155,7 +156,6 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                     }
                 });
 
-                FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle);
                 FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {

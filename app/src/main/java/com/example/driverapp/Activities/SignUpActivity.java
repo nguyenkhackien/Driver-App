@@ -140,6 +140,19 @@ public class SignUpActivity extends AppCompatActivity {
                                 String imgUrl = downloadUri.toString();
 
                                 driver.setDriverImageUrl(imgUrl);
+                                FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Intent intent = new Intent(SignUpActivity.this,LoginActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        buttonSignUp.setEnabled(true);
+                                    }
+                                });
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -149,19 +162,6 @@ public class SignUpActivity extends AppCompatActivity {
                             }
                         });
 
-                        FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                Intent intent = new Intent(SignUpActivity.this,LoginActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                buttonSignUp.setEnabled(true);
-                            }
-                        });
                     }
                 }
             });
