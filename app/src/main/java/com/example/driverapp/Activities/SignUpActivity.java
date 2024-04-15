@@ -20,6 +20,7 @@ import com.example.driverapp.models.Driver;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -110,7 +111,7 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            driver = new Driver(null,name,phone,email,imageUri.toString(),null);
+            driver = new Driver(null,name,phone,email,null,null);
             FirebaseAuth mAuth = FirebaseAuth.getInstance();
             mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
@@ -118,13 +119,15 @@ public class SignUpActivity extends AppCompatActivity {
                     if(task.isSuccessful()){
                         driver.setId(mAuth.getCurrentUser().getUid());
 
-                        StorageReference filePath = FirebaseStorage.getInstance().getReference("DriverImages")
+                        StorageReference filePath = FirebaseStorage.getInstance().getReference("DriverProfileImages")
                                 .child(System.currentTimeMillis() + ".jpg");
+
+                        //get image url
                         StorageTask uploadTask = filePath.putFile(imageUri);
                         uploadTask.continueWithTask(new Continuation() {
                             @Override
                             public Object then(@NonNull Task task) throws Exception {
-                                if(!task.isSuccessful()){
+                                if (!task.isSuccessful()) {
                                     throw task.getException();
                                 }
                                 return filePath.getDownloadUrl();
@@ -132,9 +135,11 @@ public class SignUpActivity extends AppCompatActivity {
                         }).addOnCompleteListener(new OnCompleteListener() {
                             @Override
                             public void onComplete(@NonNull Task task) {
-                                Uri downloadUri =(Uri) task.getResult();
-                                String imgUri = downloadUri.toString();
-                                driver.setDriverImageUrl(imgUri);
+                                //upload post
+                                Uri downloadUri = (Uri) task.getResult();
+                                String imgUrl = downloadUri.toString();
+
+                                driver.setDriverImageUrl(imgUrl);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
@@ -143,6 +148,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 buttonSignUp.setEnabled(true);
                             }
                         });
+
                         FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(driver.getId()).setValue(driver).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -182,6 +188,8 @@ public class SignUpActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             imgProfile.setImageURI(imageUri);
+            Toast.makeText(this, imageUri.toString(), Toast.LENGTH_SHORT).show();
+
         } else {
             Toast.makeText(this, "Error, please try again!", Toast.LENGTH_SHORT).show();
         }

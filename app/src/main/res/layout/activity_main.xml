@@ -96,7 +96,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:text="Working"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
@@ -135,7 +135,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:text="Current Order"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -163,7 +163,7 @@
                     <FrameLayout
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        android:id="@+id/buttonCurrentOrder"
+                        android:id="@+id/buttonHistory"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -180,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:text="History"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
 
@@ -201,7 +201,7 @@
                     <FrameLayout
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        android:id="@+id/buttonHistory"
+                        android:id="@+id/buttonInCome"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -218,7 +218,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:text="Income"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
                 </RelativeLayout>
@@ -243,7 +243,7 @@
                     <FrameLayout
                         android:layout_width="100dp"
                         android:layout_height="100dp"
-                        android:id="@+id/buttonLWallet"
+                        android:id="@+id/buttonWallet"
                         android:background="@drawable/menu_background"
                         android:layout_centerHorizontal="true">
 
@@ -260,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:text="L-Wallet"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:layout_marginBottom="10dp"
                         android:layout_centerHorizontal="true"/>
                 </RelativeLayout>
@@ -295,7 +295,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_marginBottom="10dp"
-                        android:textSize="25dp"
+                        android:textSize="20dp"
                         android:text="Settings"
                         android:layout_centerHorizontal="true"/>
                 </RelativeLayout>

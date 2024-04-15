@@ -27,6 +27,7 @@ import com.example.driverapp.models.Vehicle;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -126,14 +127,13 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                 vehicle.setPlateNumber(plateNumber);
                 vehicle.setType(vehicleType);
                 vehicle.setDriverId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                vehicle.setVehicleImageUrl(vehicleImg.toString());
                 StorageReference filePath = FirebaseStorage.getInstance().getReference("vehicleImages")
                         .child(System.currentTimeMillis() + ".jpg");
                 StorageTask uploadTask = filePath.putFile(vehicleImg);
                 uploadTask.continueWithTask(new Continuation() {
                     @Override
                     public Object then(@NonNull Task task) throws Exception {
-                        if(!task.isSuccessful()){
+                        if (!task.isSuccessful()) {
                             throw task.getException();
                         }
                         return filePath.getDownloadUrl();
@@ -141,9 +141,11 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                 }).addOnCompleteListener(new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
-                        Uri downloadUri =(Uri) task.getResult();
-                        String imgUri = downloadUri.toString();
-                        vehicle.setVehicleImageUrl(imgUri);
+                        //upload post
+                        Uri downloadUri = (Uri) task.getResult();
+                        String imgUrl = downloadUri.toString();
+
+                        vehicle.setVehicleImageUrl(imgUrl);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -152,15 +154,8 @@ public class RegisterVehicleActivity extends AppCompatActivity {
                         buttonRegister.setEnabled(true);
                     }
                 });
-                FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(getApplicationContext(), "Register successful!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegisterVehicleActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
+
+                FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle);
                 FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -186,8 +181,9 @@ public class RegisterVehicleActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            vehicleImg = data.getData();
+            vehicleImg =(Uri) data.getData();
             imageVehicle.setImageURI(vehicleImg);
+            Toast.makeText(this, vehicleImg.toString(), Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Error, please try again!", Toast.LENGTH_SHORT).show();
         }
