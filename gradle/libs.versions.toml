@@ -12,6 +12,7 @@ firebaseAuth = "22.3.1"
 firebaseDatabase = "20.3.1"
 firebaseStorage = "20.3.0"
 playServicesMaps = "18.2.0"
+googleAndroidLibrariesMapsplatformSecretsGradlePlugin = "2.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -29,4 +30,5 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+googleAndroidLibrariesMapsplatformSecretsGradlePlugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "googleAndroidLibrariesMapsplatformSecretsGradlePlugin" }
 

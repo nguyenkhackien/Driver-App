@@ -21,4 +21,5 @@
     <string name="motorbike">motorbike</string>
     <string name="car">car</string>
     <string name="register">register</string>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>

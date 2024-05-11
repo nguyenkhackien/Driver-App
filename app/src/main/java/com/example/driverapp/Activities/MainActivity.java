@@ -1,6 +1,8 @@
 package com.example.driverapp.Activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -65,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
         buttonSetting = findViewById(R.id.buttonSettings);
     }
     private void listener(){
-
+        btnWorking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,WorkingActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }

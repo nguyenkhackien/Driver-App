@@ -1,4 +1,4 @@
-package com.example.lightningdriver.fragments;
+package com.example.driverapp.fragments;
 
 import android.app.Activity;
 
