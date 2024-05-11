@@ -22,4 +22,6 @@
     <string name="car">car</string>
     <string name="register">register</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="welcome_to_lightning_for_driver">"Welcome "</string>
+    <string name="log_in_to_existing_account">log in to existing account</string>
 </resources>

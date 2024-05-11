@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     CircleImageView imgProfile;
     FrameLayout btnWorking, buttonCurrentOrder, buttonHistory, buttonIncome, buttonWallet, buttonSetting;
 
+    public static boolean pickUpActivityIsStart = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
