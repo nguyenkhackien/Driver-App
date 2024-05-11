@@ -31,16 +31,33 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCBGBF58vbTzlpald5vmJy81XrrEDS8ZVE" />
-
+            android:value="AIzaSyBnAt55k76eKM9_3OSJEwUzOvZFbph6RGM" />
+        <activity
+            android:name=".Activities.DailyIncome"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".Activities.OrderHistory"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".Activities.NewTripFoundActivity"
+            android:exported="false"
+            android:parentActivityName=".Activities.WorkingActivity">
+        </activity>
+        <activity
+            android:name=".Activities.IncomeDetail"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".Activities.WelcomeActivity"
+            android:exported="true">
+        </activity>
         <activity
             android:name=".Activities.WorkingActivity"
             android:exported="false" />
         <activity
             android:name=".Activities.RegisterVehicleActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activities.EachOrderIncomeItemActivity"
             android:exported="false" />
         <activity
             android:name=".Activities.WalletActivity"
@@ -59,6 +76,13 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".Activities.PickUpActivity"
+            android:exported="false">
+        </activity>
+        <activity android:name=".Activities.SettingActivity"
+            android:exported="false">
         </activity>
     </application>
 

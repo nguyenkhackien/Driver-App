@@ -29,6 +29,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -202,7 +203,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragment_maps);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_maps);
         mapFragment.getMapAsync(this);
 
         if (isMyServiceRunning(MyLocationService.class, getInstance())) {
@@ -294,7 +295,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+//        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.getUiSettings().setRotateGesturesEnabled(false);
 
         requestPermission();
