@@ -99,7 +99,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                         driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
                             setDriverInfoView(driver);
-                            loadVehicleInfo(driver.getVehicleId());
+                            loadVehicleInfo(driver.getId());
                         }
                     }
 
@@ -110,9 +110,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 });
     }
 
-    private void loadVehicleInfo(String vehicleId) {
+    private void loadVehicleInfo(String driverID) {
         FirebaseDatabase.getInstance().getReference().child("vehicles")
-                .child(vehicleId)
+                .child(driverID)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -295,7 +295,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
-//        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.getUiSettings().setRotateGesturesEnabled(false);
 
         requestPermission();
@@ -307,9 +307,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (!isMyServiceRunning(mLocationService.getClass(), this)) {
             startService(mServiceIntent);
-            //Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
         } else {
-            //Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
+            //
         }
     }
 
@@ -318,9 +317,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (isMyServiceRunning(mLocationService.getClass(), this)) {
             stopService(mServiceIntent);
-            //Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
         } else {
-            //Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
+            //
         }
     }
 
