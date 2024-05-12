@@ -183,7 +183,7 @@ public class MyLocationService extends Service {
                 new NotificationCompat.Builder(this, notificationChannelId);
 
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("Lightning driver is running")
+                .setContentTitle("driver is running")
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setSmallIcon(R.drawable.lightning_circle)
@@ -359,14 +359,14 @@ public class MyLocationService extends Service {
     }
 
     private void loadDriverInfo() {
-        FirebaseDatabase.getInstance().getReference().child("Drivers")
+        FirebaseDatabase.getInstance().getReference().child("users").child("drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
-                            loadVehicleInfo(driver.getVehicleId());
+                            loadVehicleInfo(driver.getId());
                         }
                     }
 
@@ -377,9 +377,9 @@ public class MyLocationService extends Service {
                 });
     }
 
-    private void loadVehicleInfo(String vehicleId) {
-        FirebaseDatabase.getInstance().getReference().child("Vehicles")
-                .child(vehicleId)
+    private void loadVehicleInfo(String driverId) {
+        FirebaseDatabase.getInstance().getReference().child("vehicles")
+                .child(driverId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {

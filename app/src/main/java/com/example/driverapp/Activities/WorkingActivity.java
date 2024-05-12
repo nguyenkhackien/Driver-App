@@ -75,7 +75,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     private FusedLocationProviderClient fusedLocationClient;
 
     Intent mServiceIntent;
-    LatLng UET;
     boolean workingIsEnable = false;
     public static Driver driver;
     public static Vehicle vehicle;
@@ -199,7 +198,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         instance = this;
         driver = new Driver();
 
-        UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 

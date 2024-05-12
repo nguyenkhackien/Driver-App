@@ -162,6 +162,27 @@ public class MainActivity extends AppCompatActivity {
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
+
+        FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child("drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Driver driver = snapshot.getValue(Driver.class);
+                        if (driver != null) {
+                            Picasso.get().load(driver.getDriverImageUrl())
+                                    .placeholder(R.drawable.user_blue)
+                                    .into(imageProfile);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
     }
 
     private void getDriverInfo() {

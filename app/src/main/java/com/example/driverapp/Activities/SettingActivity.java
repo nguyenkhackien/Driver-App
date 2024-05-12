@@ -135,7 +135,8 @@ public class SettingActivity extends AppCompatActivity {
 
     private void loadUserData() {
         FirebaseDatabase.getInstance().getReference()
-                .child("Drivers")
+                .child("users")
+                .child("drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
