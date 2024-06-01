@@ -526,7 +526,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             }
         }
 
-        FirebaseDatabase.getInstance().getReference().child("Passengers")
+        FirebaseDatabase.getInstance().getReference().child("users").child("passengers")
                 .child(trip.getPassengerId())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -545,7 +545,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
         }
 
     private void loadDriverInfo() {
-        FirebaseDatabase.getInstance().getReference().child("Drivers")
+        FirebaseDatabase.getInstance().getReference().child("users").child("drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
