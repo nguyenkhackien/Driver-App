@@ -66,6 +66,8 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     public static Marker currentLocationMarker;
     static WorkingActivity instance;
 
+    LatLng UET;
+
     public static WorkingActivity getInstance() {
         return instance;
     }
@@ -198,6 +200,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         instance = this;
         driver = new Driver();
 
+        UET = new LatLng(21.038902482537342, 105.78296809797327); //Dai hoc Cong Nghe Lat Lng
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -248,22 +251,24 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        Float bearing = location.getBearing();
-                        if (map != null) {
-                            if (currentLocationMarker != null)
-                                currentLocationMarker.remove();
+                        if(location != null) {
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            Float bearing = location.getBearing();
+                            if (map != null) {
+                                if (currentLocationMarker != null)
+                                    currentLocationMarker.remove();
 
-                            currentLocationMarker = map.addMarker(new MarkerOptions()
-                                    .position(latLng)
-                                    .title("You are here!")
-                                    .anchor(0.5f, 0.5f)
-                                    .rotation(bearing)
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
+                                currentLocationMarker = map.addMarker(new MarkerOptions()
+                                        .position(latLng)
+                                        .title("You are here!")
+                                        .anchor(0.5f, 0.5f)
+                                        .rotation(bearing)
+                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
-                        } else {
-                            Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
+                            } else {
+                                Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 });
