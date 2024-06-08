@@ -66,8 +66,6 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     public static Marker currentLocationMarker;
     static WorkingActivity instance;
 
-    LatLng UET;
-
     public static WorkingActivity getInstance() {
         return instance;
     }
@@ -77,6 +75,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     private FusedLocationProviderClient fusedLocationClient;
 
     Intent mServiceIntent;
+    LatLng UET;
     boolean workingIsEnable = false;
     public static Driver driver;
     public static Vehicle vehicle;
@@ -92,7 +91,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void loadDriverInfo() {
-        FirebaseDatabase.getInstance().getReference().child("users").child("drivers")
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -100,7 +99,7 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                         driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
                             setDriverInfoView(driver);
-                            loadVehicleInfo(driver.getId());
+                            loadVehicleInfo(driver.getVehicleId());
                         }
                     }
 
@@ -111,9 +110,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 });
     }
 
-    private void loadVehicleInfo(String driverID) {
-        FirebaseDatabase.getInstance().getReference().child("vehicles")
-                .child(driverID)
+    private void loadVehicleInfo(String vehicleId) {
+        FirebaseDatabase.getInstance().getReference().child("Vehicles")
+                .child(vehicleId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -251,24 +250,22 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        if(location != null) {
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                            Float bearing = location.getBearing();
-                            if (map != null) {
-                                if (currentLocationMarker != null)
-                                    currentLocationMarker.remove();
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        Float bearing = location.getBearing();
+                        if (map != null) {
+                            if (currentLocationMarker != null)
+                                currentLocationMarker.remove();
 
-                                currentLocationMarker = map.addMarker(new MarkerOptions()
-                                        .position(latLng)
-                                        .title("You are here!")
-                                        .anchor(0.5f, 0.5f)
-                                        .rotation(bearing)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
+                            currentLocationMarker = map.addMarker(new MarkerOptions()
+                                    .position(latLng)
+                                    .title("You are here!")
+                                    .anchor(0.5f, 0.5f)
+                                    .rotation(bearing)
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(markerIconName, driverMarkerSize, driverMarkerSize))));
 
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
-                            } else {
-                                Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
-                            }
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomToDriver));
+                        } else {
+                            Toast.makeText(WorkingActivity.this, "Map is null", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -310,8 +307,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (!isMyServiceRunning(mLocationService.getClass(), this)) {
             startService(mServiceIntent);
+            //Toast.makeText(this, "Service start successfully", Toast.LENGTH_SHORT).show();
         } else {
-            //
+            //Toast.makeText(this, "Service is already running", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -320,8 +318,9 @@ public class WorkingActivity extends AppCompatActivity implements OnMapReadyCall
         mServiceIntent = new Intent(this, mLocationService.getClass());
         if (isMyServiceRunning(mLocationService.getClass(), this)) {
             stopService(mServiceIntent);
+            //Toast.makeText(this, "Service stopped!!", Toast.LENGTH_SHORT).show();
         } else {
-            //
+            //Toast.makeText(this, "Service is already stopped!!", Toast.LENGTH_SHORT).show();
         }
     }
 

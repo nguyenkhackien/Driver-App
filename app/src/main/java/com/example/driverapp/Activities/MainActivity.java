@@ -162,33 +162,11 @@ public class MainActivity extends AppCompatActivity {
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
-
-        FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child("drivers")
-                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        Driver driver = snapshot.getValue(Driver.class);
-                        if (driver != null) {
-                            Picasso.get().load(driver.getDriverImageUrl())
-                                    .placeholder(R.drawable.user_blue)
-                                    .into(imageProfile);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
     }
 
     private void getDriverInfo() {
         FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child("drivers")
+                .child("Drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -221,10 +199,13 @@ public class MainActivity extends AppCompatActivity {
     private void setStatusBarColor() {
         Window window = this.getWindow();
 
+// clear FLAG_TRANSLUCENT_STATUS flag:
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
+// add FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS flag to the window
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
+// finally change the color
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.blue_toolbar));
     }
 }

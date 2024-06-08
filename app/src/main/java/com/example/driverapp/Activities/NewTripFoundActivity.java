@@ -1,18 +1,18 @@
 package com.example.driverapp.Activities;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-
 import com.example.driverapp.R;
 import com.example.driverapp.models.Trip;
-import com.example.driverapp.services.MyLocationService;
 import com.example.driverapp.tools.Const;
+import com.example.driverapp.services.MyLocationService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,7 +23,7 @@ import java.util.Objects;
 
 public class NewTripFoundActivity extends AppCompatActivity {
     TextView textMoney, textDistance, textVehicleType, textPaymentMethod,
-                textPickUp, textDropOff, textTimeRemain;
+            textPickUp, textDropOff, textTimeRemain;
 
     AppCompatButton buttonAccept, buttonReject;
 

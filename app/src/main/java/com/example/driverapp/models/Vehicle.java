@@ -1,14 +1,15 @@
 package com.example.driverapp.models;
 
 public class Vehicle {
-
+    private String id;
     private String driverId;
     private String name;
     private String type;
     private String plateNumber;
     private String vehicleImageUrl;
 
-    public Vehicle(String driverId, String name, String type, String plateNumber, String vehicleImageUrl) {
+    public Vehicle(String id, String driverId, String name, String type, String plateNumber, String vehicleImageUrl) {
+        this.id = id;
         this.driverId = driverId;
         this.name = name;
         this.type = type;
@@ -17,6 +18,14 @@ public class Vehicle {
     }
 
     public Vehicle() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDriverId() {
@@ -62,6 +71,7 @@ public class Vehicle {
     @Override
     public String toString() {
         return "Vehicle{" +
+                "id='" + id + '\'' +
                 ", driverId='" + driverId + '\'' +
                 ", name='" + name + '\'' +
                 ", type='" + type + '\'' +

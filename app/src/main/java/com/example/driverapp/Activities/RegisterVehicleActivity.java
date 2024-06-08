@@ -1,5 +1,12 @@
 package com.example.driverapp.Activities;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,15 +19,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
 import com.example.driverapp.R;
 import com.example.driverapp.models.Driver;
 import com.example.driverapp.models.Vehicle;
@@ -29,17 +27,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.Objects;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class RegisterVehicleActivity extends AppCompatActivity {
 
@@ -48,120 +49,202 @@ public class RegisterVehicleActivity extends AppCompatActivity {
     EditText edtName, edtPlateNumber;
     RadioButton radioButtonCar, radioButtonMotorbike;
     RadioGroup radioGroup;
-    AppCompatButton buttonRegister;
+    AppCompatButton buttonConfirm;
 
     Vehicle vehicle;
-
-    Uri vehicleImg;
-
-    String vehicleType;
-
     Driver driver;
-    final int PICK_IMAGE_REQUEST = 1;
+    Uri imageUri;
+    String vehicleType;
+    ProgressDialog progressDialog;
+
+    final int PICK_IMAGE_REQUEST = 123;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register_vehicle);
+
         init();
         listener();
     }
-    private void init(){
+
+    private void listener() {
+        imageVehicle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+        textUploadImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pickImage();
+            }
+        });
+
+        buttonConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (checkInputData()) {
+                    uploadImageAndRegister(getApplicationContext(), imageUri, vehicle);
+                    buttonConfirm.setEnabled(false);
+                }
+            }
+        });
+
+
+        radioButtonMotorbike.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    vehicleType = "motorbike";
+                }
+            }
+        });
+
+        radioButtonCar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    vehicleType = "car";
+                }
+            }
+        });
+    }
+
+    private void pickImage() {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, PICK_IMAGE_REQUEST);
+    }
+
+    private boolean checkInputData() {
+        String name = edtName.getText().toString().trim();
+        String plateNumber = edtPlateNumber.getText().toString().trim();
+
+        if (imageUri == null) {
+            Toast.makeText(this, "Please select your vehicle Image!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Your vehicle's name can not be empty!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (plateNumber.isEmpty()) {
+            Toast.makeText(this, "Your vehicle's plate number can not be empty!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (vehicleType == null) {
+            Toast.makeText(this, "Please select your vehicle type!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        vehicle.setName(name);
+        vehicle.setPlateNumber(plateNumber);
+        vehicle.setType(vehicleType);
+        vehicle.setDriverId(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+
+        return true;
+    }
+
+    private void init() {
         imageVehicle = findViewById(R.id.img_vehicle);
         textUploadImage = findViewById(R.id.text_uploadVehicleImage);
         edtName = findViewById(R.id.edt_name);
         edtPlateNumber = findViewById(R.id.edt_plate);
         radioButtonCar = findViewById(R.id.radio_car);
         radioButtonMotorbike = findViewById(R.id.radio_motorbike);
-        buttonRegister = findViewById(R.id.btnRegister);
+        buttonConfirm = findViewById(R.id.btnRegister);
         radioGroup = findViewById(R.id.group_selectType);
+
         vehicle = new Vehicle();
+        progressDialog = new ProgressDialog(RegisterVehicleActivity.this);
     }
 
-    private void listener(){
-        textUploadImage.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType("image/*");
-            startActivityForResult(intent,PICK_IMAGE_REQUEST);
-        });
-        radioButtonCar.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+    private void uploadImageAndRegister(Context context, Uri imageUri, Vehicle vehicle) {
+        progressDialog.setMessage("Registering your vehicle...");
+        progressDialog.show();
+
+        //get image name & extension
+        StorageReference filePath = FirebaseStorage.getInstance().getReference("VehicleImages")
+                .child(System.currentTimeMillis() + ".jpg");
+
+        //get image url
+        StorageTask uploadTask = filePath.putFile(imageUri);
+        uploadTask.continueWithTask(new Continuation() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    vehicleType = "car";
+            public Object then(@NonNull Task task) throws Exception {
+                if (!task.isSuccessful()) {
+                    throw task.getException();
                 }
+                return filePath.getDownloadUrl();
+            }
+        }).addOnCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete(@NonNull Task task) {
+                //upload post
+                Uri downloadUri = (Uri) task.getResult();
+                String imgUrl = downloadUri.toString();
+
+                vehicle.setVehicleImageUrl(imgUrl);
+                registerVehicle(context, vehicle);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                buttonConfirm.setEnabled(true);
             }
         });
-        radioButtonMotorbike.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    vehicleType = "motorbike";
-                }
-            }
-        });
-        buttonRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = edtName.getText().toString();
-                String plateNumber = edtPlateNumber.getText().toString();
+    }
 
-                if (vehicleImg == null) {
-                    Toast.makeText(getApplicationContext(), "Please select your vehicle Image!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (name.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Your vehicle's name can not be empty!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (plateNumber.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Your vehicle's plate number can not be empty!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (vehicleType == null) {
-                    Toast.makeText(getApplicationContext(), "Please select your vehicle type!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+    private void registerVehicle(Context context, Vehicle vehicle) {
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Vehicles");
 
-                vehicle.setName(name);
-                vehicle.setPlateNumber(plateNumber);
-                vehicle.setType(vehicleType);
-                vehicle.setDriverId(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                StorageReference filePath = FirebaseStorage.getInstance().getReference("vehicleImages")
-                        .child(System.currentTimeMillis() + ".jpg");
-                StorageTask uploadTask = filePath.putFile(vehicleImg);
-                uploadTask.continueWithTask(new Continuation() {
+        vehicle.setId(databaseReference.push().getKey());
+
+        //upload vehicle info to FirebaseDatabase
+        databaseReference.child(vehicle.getId()).setValue(vehicle)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public Object then(@NonNull Task task) throws Exception {
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(context, "Register successful!", Toast.LENGTH_SHORT).show();
+                            progressDialog.dismiss();
+                            Intent intent = new Intent(RegisterVehicleActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
                         }
-                        return filePath.getDownloadUrl();
                     }
-                }).addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        //upload post
-                        Uri downloadUri = (Uri) task.getResult();
-                        String imgUrl = downloadUri.toString();
-
-                        vehicle.setVehicleImageUrl(imgUrl);
-                        FirebaseDatabase.getInstance().getReference().child("vehicles").child(vehicle.getDriverId()).setValue(vehicle);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
+                })
+                .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-                        buttonRegister.setEnabled(true);
+                        Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        buttonConfirm.setEnabled(true);
                     }
                 });
 
-                FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+        //update vehicle id in driver info
+        getAndUpdateCurrentDriverInfo(vehicle.getId());
+    }
+
+    private void getAndUpdateCurrentDriverInfo (String vehicleId) {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         driver = snapshot.getValue(Driver.class);
-                        driver.setVehicleId(vehicle.getPlateNumber());
-                        FirebaseDatabase.getInstance().getReference().child("users").child("drivers").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(driver);
+                        assert driver != null;
+                        driver.setVehicleId(vehicleId);
+
+                        if (driver != null) {
+                            updateCurrentDriverInfo(driver);
+                        } else {
+                            Toast.makeText(RegisterVehicleActivity.this, "Driver is null!", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override
@@ -169,21 +252,25 @@ public class RegisterVehicleActivity extends AppCompatActivity {
 
                     }
                 });
-
-                Intent intent = new Intent(RegisterVehicleActivity.this,MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+    }
+    private void updateCurrentDriverInfo(Driver driver) {
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
+                .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                .setValue(driver)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(RegisterVehicleActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null) {
-            vehicleImg =(Uri) data.getData();
-            imageVehicle.setImageURI(vehicleImg);
-            Toast.makeText(this, vehicleImg.toString(), Toast.LENGTH_SHORT).show();
+            imageUri = data.getData();
+            imageVehicle.setImageURI(imageUri);
         } else {
             Toast.makeText(this, "Error, please try again!", Toast.LENGTH_SHORT).show();
         }

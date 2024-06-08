@@ -1,30 +1,41 @@
 package com.example.driverapp.services;
 
+import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static com.example.driverapp.Activities.WorkingActivity.currentLocationMarker;
+import static com.example.driverapp.Activities.WorkingActivity.driver;
 import static com.example.driverapp.Activities.WorkingActivity.driverMarkerSize;
 import static com.example.driverapp.Activities.WorkingActivity.map;
 import static com.example.driverapp.Activities.WorkingActivity.markerIconName;
+import static com.example.driverapp.Activities.WorkingActivity.vehicle;
 import static com.example.driverapp.Activities.WorkingActivity.zoomToDriver;
 
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.hardware.lights.LightsManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.ContactsContract;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.graphics.drawable.IconCompat;
+
 
 import com.example.driverapp.R;
 import com.example.driverapp.Activities.NewTripFoundActivity;
@@ -51,10 +62,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -183,7 +196,7 @@ public class MyLocationService extends Service {
                 new NotificationCompat.Builder(this, notificationChannelId);
 
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("driver is running")
+                .setContentTitle("Lightning driver is running")
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setSmallIcon(R.drawable.lightning_circle)
@@ -279,7 +292,7 @@ public class MyLocationService extends Service {
                                         isFindingTrip = false;
                                         return;
                                     }
-                                }
+                            }
                         }
 
                         if (listTrips.size() > 0 && isFindingTrip && !PickUpActivity.isRunning) {
@@ -359,14 +372,14 @@ public class MyLocationService extends Service {
     }
 
     private void loadDriverInfo() {
-        FirebaseDatabase.getInstance().getReference().child("users").child("drivers")
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         driver = snapshot.getValue(Driver.class);
                         if (driver != null) {
-                            loadVehicleInfo(driver.getId());
+                            loadVehicleInfo(driver.getVehicleId());
                         }
                     }
 
@@ -377,9 +390,9 @@ public class MyLocationService extends Service {
                 });
     }
 
-    private void loadVehicleInfo(String driverId) {
-        FirebaseDatabase.getInstance().getReference().child("vehicles")
-                .child(driverId)
+    private void loadVehicleInfo(String vehicleId) {
+        FirebaseDatabase.getInstance().getReference().child("Vehicles")
+                .child(vehicleId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {

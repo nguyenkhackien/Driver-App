@@ -1,5 +1,13 @@
 package com.example.driverapp.Activities;
 
+import static java.lang.Thread.sleep;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -13,18 +21,13 @@ import android.graphics.Point;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -40,9 +43,9 @@ import com.example.driverapp.models.Driver;
 import com.example.driverapp.models.Passenger;
 import com.example.driverapp.models.Trip;
 import com.example.driverapp.models.Vehicle;
-import com.example.driverapp.services.MyLocationService;
 import com.example.driverapp.tools.Const;
 import com.example.driverapp.tools.DecodeTool;
+import com.example.driverapp.services.MyLocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -214,7 +217,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onClick(View v) {
                 if (passenger != null) {
-                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CALL_PHONE)
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CALL_PHONE)
                             != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(PickUpActivity.this,
                                 new String[]{Manifest.permission.CALL_PHONE},
@@ -233,7 +236,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onClick(View v) {
                 if (passenger != null) {
-                    if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.SEND_SMS)
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),android.Manifest.permission.SEND_SMS)
                             != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(PickUpActivity.this,
                                 new String[]{Manifest.permission.SEND_SMS},
@@ -526,7 +529,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             }
         }
 
-        FirebaseDatabase.getInstance().getReference().child("users").child("passengers")
+        FirebaseDatabase.getInstance().getReference().child("Passengers")
                 .child(trip.getPassengerId())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -542,10 +545,10 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
 
                     }
                 });
-        }
+    }
 
     private void loadDriverInfo() {
-        FirebaseDatabase.getInstance().getReference().child("users").child("drivers")
+        FirebaseDatabase.getInstance().getReference().child("Drivers")
                 .child(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
                 .addValueEventListener(new ValueEventListener() {
                     @Override
@@ -762,7 +765,7 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
                                         DecodeTool.getLatLngFromString(driverCurrentPosition.getPosition()),
                                         DecodeTool.getLatLngFromString(trip.getPickUpLocation()),
                                         DecodeTool.getLatLngFromString(trip.getDropOffLocation())
-                            );
+                                );
                                 loadTripInfo(trip);
                                 markPickUpAndDropOff(trip);
                                 setVehicleIcon(trip);
@@ -811,50 +814,50 @@ public class PickUpActivity extends AppCompatActivity implements OnMapReadyCallb
             public void onResponse(JSONObject response) {
                 progressDialog.dismiss();
                 try {
-                        JSONArray routes = response.getJSONArray("routes");
+                    JSONArray routes = response.getJSONArray("routes");
 
-                        ArrayList<LatLng> points;
-                        PolylineOptions polylineOptions = null;
+                    ArrayList<LatLng> points;
+                    PolylineOptions polylineOptions = null;
 
-                        for (int i=0;i<routes.length();i++) {
-                            points = new ArrayList<>();
-                            polylineOptions = new PolylineOptions();
-                            JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
+                    for (int i=0;i<routes.length();i++) {
+                        points = new ArrayList<>();
+                        polylineOptions = new PolylineOptions();
+                        JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
 
-                            for (int j = 0; j < legs.length(); j++) {
-                                JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
+                        for (int j = 0; j < legs.length(); j++) {
+                            JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
 
-                                for (int k = 0; k < steps.length(); k++) {
-                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
-                                    List<LatLng> list = decodePoly(polyline);
+                            for (int k = 0; k < steps.length(); k++) {
+                                String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
+                                List<LatLng> list = decodePoly(polyline);
 
-                                    for (int l = 0; l < list.size(); l++) {
-                                        LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
-                                        points.add(position);
-                                    }
+                                for (int l = 0; l < list.size(); l++) {
+                                    LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
+                                    points.add(position);
                                 }
                             }
-                            polylineOptions.addAll(points);
-                            polylineOptions.width(polyWidth);
-                            polylineOptions.geodesic(true);
-                            polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
                         }
-                        assert polylineOptions != null;
-                        Polyline tempPoly = map.addPolyline(polylineOptions);
-                        LatLngBounds bounds = new LatLngBounds.Builder()
-                                .include(new LatLng(destination.latitude, destination.longitude))
-                                .include(new LatLng(origin.latitude, origin.longitude)).build();
-                        Point point = new Point();
-                        getWindowManager().getDefaultDisplay().getSize(point);
+                        polylineOptions.addAll(points);
+                        polylineOptions.width(polyWidth);
+                        polylineOptions.geodesic(true);
+                        polylineOptions.color(ContextCompat.getColor(getApplicationContext(), R.color.blue));
+                    }
+                    assert polylineOptions != null;
+                    Polyline tempPoly = map.addPolyline(polylineOptions);
+                    LatLngBounds bounds = new LatLngBounds.Builder()
+                            .include(new LatLng(destination.latitude, destination.longitude))
+                            .include(new LatLng(origin.latitude, origin.longitude)).build();
+                    Point point = new Point();
+                    getWindowManager().getDefaultDisplay().getSize(point);
 
-                        if (option.equals("pick-up")) {
-                            pickupPolyline = tempPoly;
-                            pickUpIsDrawn = true;
-                        } else {
-                            dropOffPolyLine = tempPoly;
-                            dropOffIsDrawn = true;
-                        }
-                        map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
+                    if (option.equals("pick-up")) {
+                        pickupPolyline = tempPoly;
+                        pickUpIsDrawn = true;
+                    } else {
+                        dropOffPolyLine = tempPoly;
+                        dropOffIsDrawn = true;
+                    }
+                    map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, point.x, 800, 250));
                 } catch (JSONException e) {
                     Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
